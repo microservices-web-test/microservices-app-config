@@ -11,7 +11,9 @@ resources:
 configMapGenerator:
   - name: auth-migrations
     files:
+      # BEGIN migrations (managed by Jenkins)
       - migrations/V1__init.sql
+      # END migrations
     options:
       disableNameSuffixHash: true
       annotations:
