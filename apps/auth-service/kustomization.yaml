@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: microservices
+resources:
+  - sealed-secrets.yaml   # auth-db-credentials + ocir-secret (encrypted)
+  - postgres.yaml
+  - migration-job.yaml
+  - deployment.yaml
+  - service.yaml
+# Flyway SQL -> ConfigMap "auth-migrations" (mounted by the migration Job).
+configMapGenerator:
+  - name: auth-migrations
+    files:
+      - migrations/V1__init.sql
+    options:
+      disableNameSuffixHash: true
+      annotations:
+        argocd.argoproj.io/sync-wave: "0"
+# >>> Jenkins updates ONLY newTag (via sed) after pushing a new image. <<<
+images:
+  - name: lhr.ocir.io/lryjhgnewmyj/microservices-auth
+    newTag: 4-cf2ac24
+patches:
+  - target:
+      kind: SealedSecret
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          argocd.argoproj.io/sync-wave: "-1"
+          # lets the controller adopt the Secrets that already exist in the cluster
+          sealedsecrets.bitnami.com/managed: "true"
