@@ -26,11 +26,9 @@ spec:
         app.kubernetes.io/name: auth-service
         app.kubernetes.io/part-of: microservices-demo
     spec:
-      imagePullSecrets:
-        - name: ocir-secret
       containers:
         - name: auth-service
-          image: lhr.ocir.io/lryjhgnewmyj/microservices-auth:v1
+          image: nandul2424/microservices-auth-service:v1
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

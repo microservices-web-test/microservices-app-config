@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: microservices
 resources:
-  - sealed-secrets.yaml   # auth-db-credentials + ocir-secret (encrypted)
+  - sealed-secrets.yaml   # auth-db-credentials (encrypted)
   - postgres.yaml
   - migration-job.yaml
   - deployment.yaml
@@ -20,7 +20,7 @@ configMapGenerator:
         argocd.argoproj.io/sync-wave: "0"
 # >>> Jenkins updates ONLY newTag (via sed) after pushing a new image. <<<
 images:
-  - name: lhr.ocir.io/lryjhgnewmyj/microservices-auth
+  - name: nandul2424/microservices-auth-service
     newTag: 8-8f2fbea
 patches:
   - target:
