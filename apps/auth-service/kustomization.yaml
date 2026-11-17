@@ -21,7 +21,7 @@ configMapGenerator:
 # >>> Jenkins updates ONLY newTag (via sed) after pushing a new image. <<<
 images:
   - name: nandul2424/microservices-auth-service
-    newTag: 8-8f2fbea
+    newTag: 9-b07d451
 patches:
   - target:
       kind: SealedSecret
