@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: microservices-frontend-service
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:microservices-web-test/microservices-app-config.git
+    targetRevision: main
+    path: apps/microservices-frontend-service
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: microservices
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
