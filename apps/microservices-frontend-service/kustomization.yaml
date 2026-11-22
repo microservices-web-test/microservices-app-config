@@ -7,4 +7,4 @@ resources:
 # >>> Jenkins updates ONLY newTag (via sed) after pushing a new image. <<<
 images:
   - name: nandul2424/microservices-frontend-service
-    newTag: latest
+    newTag: 8-beaf26c
