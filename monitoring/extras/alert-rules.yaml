@@ -1,0 +1,44 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: microservices-alerts
+  namespace: monitoring
+  labels: { release: kps }
+spec:
+  groups:
+    - name: microservices.rules
+      rules:
+        - alert: ServiceHighErrorRate
+          expr: |
+            sum by (service) (rate(http_request_duration_seconds_count{namespace="microservices",status_code=~"5.."}[5m]))
+              / sum by (service) (rate(http_request_duration_seconds_count{namespace="microservices"}[5m])) > 0.05
+          for: 5m
+          labels: { severity: critical }
+          annotations:
+            summary: "{{ $labels.service }} 5xx ratio above 5%"
+        - alert: ServiceHighLatencyP95
+          expr: |
+            histogram_quantile(0.95, sum by (service, le) (rate(http_request_duration_seconds_bucket{namespace="microservices",route!="/metrics"}[5m]))) > 1
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: "{{ $labels.service }} p95 latency above 1s"
+        - alert: ApplicationTargetDown
+          expr: up{namespace="microservices",pod=~"auth-service.*|payment-service.*|frontend.*"} == 0
+          for: 2m
+          labels: { severity: critical }
+          annotations:
+            summary: "Metrics target {{ $labels.pod }} is down"
+        - alert: NginxExporterCannotReachNginx
+          expr: nginx_up{namespace="microservices"} == 0
+          for: 2m
+          labels: { severity: critical }
+          annotations:
+            summary: "nginx in {{ $labels.pod }} is not responding"
+        - alert: DeploymentReplicasUnavailable
+          expr: kube_deployment_status_replicas_unavailable{namespace="microservices"} > 0
+          for: 5m
+          labels: { severity: warning }
+          annotations:
+            summary: "Deployment {{ $labels.deployment }} has unavailable replicas"
+

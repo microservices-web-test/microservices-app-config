@@ -1,0 +1,23 @@
+# ServiceMonitors, alert rules, dashboards and secrets for the monitoring stack.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring-extras
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:microservices-web-test/microservices-app-config.git
+    targetRevision: main
+    path: monitoring/extras
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - SkipDryRunOnMissingResource=true   # ServiceMonitor/PrometheusRule CRDs come from the other app
+

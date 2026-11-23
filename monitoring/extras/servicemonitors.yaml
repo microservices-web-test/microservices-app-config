@@ -1,0 +1,55 @@
+# Scrape targets for the application services (namespace: microservices).
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: auth-service
+  namespace: monitoring
+  labels: { release: kps }
+spec:
+  namespaceSelector:
+    matchNames: [microservices]
+  selector:
+    matchLabels:
+      app: auth-service
+  endpoints:
+    - port: http          # Service port name; app exposes GET /metrics
+      path: /metrics
+      interval: 15s
+---
+# Disabled until payment-service is moved into this repo (re-enable then).
+# apiVersion: monitoring.coreos.com/v1
+# kind: ServiceMonitor
+# metadata:
+#   name: payment-service
+#   namespace: monitoring
+#   labels: { release: kps }
+# spec:
+#   namespaceSelector:
+#     matchNames: [microservices]
+#   selector:
+#     matchLabels:
+#       app: payment-service
+#   endpoints:
+#     - port: http
+#       path: /metrics
+#       interval: 15s
+---
+# Frontend: nginx-exporter sidecar container port "metrics" (9113) -> PodMonitor,
+# so the metrics port is not exposed via the public NodePort Service.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: frontend
+  namespace: monitoring
+  labels: { release: kps }
+spec:
+  namespaceSelector:
+    matchNames: [microservices]
+  selector:
+    matchLabels:
+      app: frontend
+  podMetricsEndpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+
