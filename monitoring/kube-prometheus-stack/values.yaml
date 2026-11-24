@@ -54,9 +54,16 @@ grafana:
       searchNamespace: ALL
   service:
     type: ClusterIP   # access with: kubectl -n monitoring port-forward svc/kps-grafana 3000:80
+  # Grafana 13 uses ~250Mi at startup (was OOM-killed at 256Mi), so give it headroom.
   resources:
-    requests: { cpu: 50m, memory: 128Mi }
-    limits: { memory: 256Mi }
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { memory: 768Mi }
+  # Skip the background download of preinstalled apps (loki/pyroscope/advisor...)
+  # we don't use; saves startup memory and needs no internet access.
+  grafana.ini:
+    plugins:
+      preinstall_disabled: true
+      preinstall_auto_update: false
 
 kube-state-metrics:
   resources:
