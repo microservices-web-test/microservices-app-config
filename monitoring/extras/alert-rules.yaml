@@ -23,7 +23,16 @@ spec:
           labels: { severity: warning }
           annotations:
             summary: "{{ $labels.service }} p95 latency above 1s"
+        - alert: ServiceHasNoAvailableReplicas
+          # Fires when a Deployment has zero ready pods (scaled to 0, all crashing, bad rollout).
+          # Unlike `up == 0`, this still works when the pods no longer exist.
+          expr: kube_deployment_status_replicas_available{namespace="microservices"} == 0
+          for: 1m
+          labels: { severity: critical }
+          annotations:
+            summary: "Deployment {{ $labels.deployment }} has NO available replicas (service down)"
         - alert: ApplicationTargetDown
+          # A running pod whose /metrics scrape fails.
           expr: up{namespace="microservices",pod=~"auth-service.*|payment-service.*|frontend.*"} == 0
           for: 2m
           labels: { severity: critical }
